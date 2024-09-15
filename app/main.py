@@ -52,8 +52,8 @@ async def fetch_collection_data():
         COUNT(CASE WHEN tori.ItemCode IN ({collect_code_list}) THEN 1 END) > 0;
     """
 
-    logger.debug(f"SQL query prepared: {collection_query}")
-    logger.debug(f"Collect item codes: {collect_itemcodes}")
+    # logger.debug(f"SQL query prepared: {collection_query}")
+    # logger.debug(f"Collect item codes: {collect_itemcodes}")
 
     try:
         logger.debug("Connecting to SQL Server")
