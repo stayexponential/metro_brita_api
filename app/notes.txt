@@ -1,0 +1,7 @@
+database configuration : nano /opt/homebrew/etc/freetds.conf
+
+[myserver]
+ host = 192.168.0.5           # SQL Server IP address
+ port = 1433                  # Use the port number for the instance, if known
+ tds version = 8.0            # Ensure this matches your SQL Server version
+ instance = BRITAXL           # Specify the instance name
