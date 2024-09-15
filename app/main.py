@@ -1,8 +1,11 @@
 # app/main.py
 
 import logging
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
 from app.db import get_db_connection
+from app.auth import authenticate_user, create_access_token, get_current_active_user, User, fake_users_db, ACCESS_TOKEN_EXPIRE_MINUTES
 
 # Configure logging
 logging.basicConfig(
@@ -15,9 +18,27 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+
+# Endpoint to generate a token
+@app.post("/token", response_model=dict)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
 # Endpoint to fetch collection data
-@app.get("/fetch-collection")
-async def fetch_collection_data():
+@app.get("/api/v1/pos/fetch-collection")
+async def fetch_collection_data(current_user: User = Depends(get_current_active_user)):
     collect_itemcodes = ['0000000001']
     collect_code_list = ', '.join(['%s'] * len(collect_itemcodes))  # Correct number of placeholders
 
@@ -82,8 +103,8 @@ async def fetch_collection_data():
     
 
 # Endpoint to fetch redemption data
-@app.get("/fetch-redemption")
-async def fetch_redemption_data():
+@app.get("/api/v1/pos/fetch-redemption")
+async def fetch_redemption_data(current_user: User = Depends(get_current_active_user)):
     redeem_typecode = ['999']
     redeem_typecode_list = ', '.join(['%s'] * len(redeem_typecode))
 
@@ -103,8 +124,8 @@ async def fetch_redemption_data():
     ON topy.OrderID=tor.OrderID
     WHERE Pycode IN ({redeem_typecode_list});
     """
-    logger.debug(f"SQL query prepared: {redemption_query}")
-    logger.debug(f"Redeem type codes: {redeem_typecode}")
+    # logger.debug(f"SQL query prepared: {redemption_query}")
+    # logger.debug(f"Redeem type codes: {redeem_typecode}")
 
     try:
         # Fetch data from SQL Server

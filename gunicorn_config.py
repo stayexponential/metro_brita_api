@@ -1,7 +1,7 @@
 # gunicorn_config.py
 
 # Server socket
-bind = "0.0.0.0:8000"  # Bind to all interfaces on port 8000
+bind = "0.0.0.0:8011"  # Bind to all interfaces on port 8000
 
 # Worker Options
 workers = 4  # Number of worker processes, adjust based on your CPU cores

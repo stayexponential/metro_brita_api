@@ -8,7 +8,7 @@
 
 # Set default values for host and port if not provided
 HOST="${1:-0.0.0.0}"
-PORT="${2:-8000}"
+PORT="${2:-8011}"
 
 # Run Gunicorn with the specified configuration file
 echo "Starting Gunicorn server on ${HOST}:${PORT}..."
